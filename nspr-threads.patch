@@ -1,0 +1,35 @@
+--- pr/src/io/prmapopt.c	2009-05-02 01:08:04.000000000 +0200
++++ pr/src/io/prmapopt.c	2011-09-27 21:07:11.000000000 +0200
+@@ -195,8 +195,6 @@
+     if (PR_SockOpt_Nonblocking == data->option)
+     {
+ #ifdef WINNT
+-        PR_ASSERT((fd->secret->md.io_model_committed == PR_FALSE)
+-            || (fd->secret->nonblocking == data->value.non_blocking));
+         if (fd->secret->md.io_model_committed
+             && (fd->secret->nonblocking != data->value.non_blocking))
+         {
+--- pr/src/md/windows/ntdllmn.c	2004-04-25 17:01:00.000000000 +0200
++++ pr/src/md/windows/ntdllmn.c	2011-09-27 21:07:11.000000000 +0200
+@@ -30,6 +30,7 @@
+ 
+     switch (fdwReason) {
+         case DLL_PROCESS_ATTACH:
++#ifdef _MSC_VER
+             /*
+              * If lpvReserved is NULL, we are dynamically loaded
+              * and therefore can't use static thread-local storage.
+@@ -39,6 +40,13 @@
+             } else {
+                 _pr_use_static_tls = TRUE;
+             }
++#else
++            /* 
++             * No __declspec(thread) on mingw, so just use
++             * the Tls* API always.
++             */
++            _pr_use_static_tls = FALSE;
++#endif
+             break;
+         case DLL_THREAD_ATTACH:
+             break;

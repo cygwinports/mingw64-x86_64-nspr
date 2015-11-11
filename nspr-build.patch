@@ -1,0 +1,208 @@
+--- config/autoconf.mk.in	2014-08-12 17:40:57.000000000 +0200
++++ config/autoconf.mk.in	2014-10-03 12:26:40.054472479 +0200
+@@ -32,6 +32,7 @@
+ OBJ_SUFFIX	= $(error config/config.mk needs to be included before using OBJ_SUFFIX)
+ _OBJ_SUFFIX	= @OBJ_SUFFIX@
+ LIB_SUFFIX	= @LIB_SUFFIX@
++IMPORT_LIB_SUFFIX = @IMPORT_LIB_SUFFIX@
+ DLL_SUFFIX	= @DLL_SUFFIX@
+ ASM_SUFFIX	= @ASM_SUFFIX@
+ MOD_NAME	= @NSPR_MODNAME@
+--- config/rules.mk
++++ config/rules.mk
+@@ -85,16 +85,16 @@ SHARED_LIBRARY	= $(OBJDIR)/$(LIBRARY_NAME)$(LIBRARY_VERSION).$(DLL_SUFFIX)
+ SHARED_LIB_PDB	= $(OBJDIR)/$(LIBRARY_NAME)$(LIBRARY_VERSION).pdb
+ ifdef MSC_VER
+ LIBRARY         = $(OBJDIR)/$(LIBRARY_NAME)$(LIBRARY_VERSION)_s.$(LIB_SUFFIX)
+-IMPORT_LIBRARY  = $(OBJDIR)/$(LIBRARY_NAME)$(LIBRARY_VERSION).$(LIB_SUFFIX)
++IMPORT_LIBRARY  = $(OBJDIR)/$(LIBRARY_NAME)$(LIBRARY_VERSION).$(IMPORT_LIB_SUFFIX)
+ else
+ LIBRARY         = $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION)_s.$(LIB_SUFFIX)
+-IMPORT_LIBRARY  = $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION).$(LIB_SUFFIX)
++IMPORT_LIBRARY  = $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION).$(IMPORT_LIB_SUFFIX)
+ endif
+ else
+ SHARED_LIBRARY	= $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION).$(DLL_SUFFIX)
+ SHARED_LIB_PDB	= $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION).pdb
+ LIBRARY         = $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION)_s.$(LIB_SUFFIX)
+-IMPORT_LIBRARY  = $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION).$(LIB_SUFFIX)
++IMPORT_LIBRARY  = $(OBJDIR)/lib$(LIBRARY_NAME)$(LIBRARY_VERSION).$(IMPORT_LIB_SUFFIX)
+ endif
+ 
+ else
+--- configure	2014-08-12 17:40:57.000000000 +0200
++++ configure	2014-10-03 12:43:25.285681512 +0200
+@@ -664,6 +664,7 @@
+ WRAP_LDFLAGS
+ ASM_SUFFIX
+ DLL_SUFFIX
++IMPORT_LIB_SUFFIX
+ LIB_SUFFIX
+ OBJ_SUFFIX
+ CPU_ARCH
+@@ -5618,6 +5619,7 @@
+ 
+ OBJ_SUFFIX=o
+ LIB_SUFFIX=a
++IMPORT_LIB_SUFFIX=$(IMPORT_LIB_SUFFIX)
+ DLL_SUFFIX=so
+ ASM_SUFFIX=s
+ MKSHLIB='$(LD) $(DSO_LDOPTS) -o $@'
+@@ -7104,6 +7106,7 @@
+         CC="$CC -mwindows"
+         CXX="$CXX -mwindows"
+         DLL_SUFFIX=dll
++        IMPORT_LIB_SUFFIX=dll.a
+         MKSHLIB='$(CC) -shared -Wl,--export-all-symbols -Wl,--out-implib -Wl,$(IMPORT_LIBRARY) $(DLLBASE) -o $(subst $(OBJDIR)/,,$(SHARED_LIBRARY))'
+         RC=$WINDRES
+         # Use temp file for windres (bug 213281)
+@@ -7118,6 +7121,7 @@
+         GARBAGE='$(OBJDIR)/vc20.pdb $(OBJDIR)/vc40.pdb'
+         OBJ_SUFFIX=obj
+         LIB_SUFFIX=lib
++        IMPORT_LIB_SUFFIX=lib
+         DLL_SUFFIX=dll
+ 
+         # Determine compiler version
+@@ -7232,11 +7236,11 @@
+ 
+         if test "$OS_TARGET" = "WINNT"; then
+             CFLAGS="$CFLAGS -GT"
+-            LIBNSPR='$(dist_libdir)/libnspr$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
+-            LIBPLC='$(dist_libdir)/libplc$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
++            LIBNSPR='$(dist_libdir)/libnspr$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
++            LIBPLC='$(dist_libdir)/libplc$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
+         else
+-            LIBNSPR='$(dist_libdir)/nspr$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
+-            LIBPLC='$(dist_libdir)/plc$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
++            LIBNSPR='$(dist_libdir)/nspr$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
++            LIBPLC='$(dist_libdir)/plc$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
+         fi
+     fi # GNU_CC
+ 
+@@ -7716,6 +7720,7 @@
+ 
+     USE_PTHREADS=1
+     LIB_SUFFIX=lib
++    IMPORT_LIB_SUFFIX=lib
+     DLL_SUFFIX=dll
+     MKSHLIB=
+     DSO_LDOPTS=
+@@ -7780,6 +7785,7 @@
+     $as_echo "#define TCPV40HDRS 1" >>confdefs.h
+ 
+     LIB_SUFFIX=lib
++    IMPORT_LIB_SUFFIX=lib
+     DLL_SUFFIX=dll
+     RC=rc.exe
+     PR_MD_ARCH_DIR=os2
+--- configure.in	2014-08-12 17:40:57.000000000 +0200
++++ configure.in	2014-10-03 12:43:09.638035918 +0200
+@@ -854,6 +854,7 @@
+ dnl ========================================================
+ OBJ_SUFFIX=o
+ LIB_SUFFIX=a
++IMPORT_LIB_SUFFIX=$(IMPORT_LIB_SUFFIX)
+ DLL_SUFFIX=so
+ ASM_SUFFIX=s
+ MKSHLIB='$(LD) $(DSO_LDOPTS) -o $@'
+@@ -1916,6 +1917,7 @@
+         CC="$CC -mwindows"
+         CXX="$CXX -mwindows"
+         DLL_SUFFIX=dll
++        IMPORT_LIB_SUFFIX=dll.a
+         MKSHLIB='$(CC) -shared -Wl,--export-all-symbols -Wl,--out-implib -Wl,$(IMPORT_LIBRARY) $(DLLBASE) -o $(subst $(OBJDIR)/,,$(SHARED_LIBRARY))'
+         RC=$WINDRES
+         # Use temp file for windres (bug 213281)
+@@ -1930,6 +1932,7 @@
+         GARBAGE='$(OBJDIR)/vc20.pdb $(OBJDIR)/vc40.pdb'
+         OBJ_SUFFIX=obj
+         LIB_SUFFIX=lib
++        IMPORT_LIB_SUFFIX=lib
+         DLL_SUFFIX=dll
+ 
+         # Determine compiler version
+@@ -2046,11 +2049,11 @@
+         
+         if test "$OS_TARGET" = "WINNT"; then
+             CFLAGS="$CFLAGS -GT"
+-            LIBNSPR='$(dist_libdir)/libnspr$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
+-            LIBPLC='$(dist_libdir)/libplc$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
++            LIBNSPR='$(dist_libdir)/libnspr$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
++            LIBPLC='$(dist_libdir)/libplc$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
+         else
+-            LIBNSPR='$(dist_libdir)/nspr$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
+-            LIBPLC='$(dist_libdir)/plc$(MOD_MAJOR_VERSION).$(LIB_SUFFIX)'
++            LIBNSPR='$(dist_libdir)/nspr$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
++            LIBPLC='$(dist_libdir)/plc$(MOD_MAJOR_VERSION).$(IMPORT_LIB_SUFFIX)'
+         fi
+     fi # GNU_CC
+ 
+@@ -2452,6 +2455,7 @@
+     AC_DEFINE(HAVE_SOCKLEN_T)
+     USE_PTHREADS=1
+     LIB_SUFFIX=lib
++    IMPORT_LIB_SUFFIX=lib
+     DLL_SUFFIX=dll
+     MKSHLIB=
+     DSO_LDOPTS=
+@@ -2506,6 +2510,7 @@
+     AC_DEFINE(BSD_SELECT)
+     AC_DEFINE(TCPV40HDRS)
+     LIB_SUFFIX=lib
++    IMPORT_LIB_SUFFIX=lib
+     DLL_SUFFIX=dll
+     RC=rc.exe
+     PR_MD_ARCH_DIR=os2
+@@ -3085,6 +3090,7 @@
+ 
+ AC_SUBST(OBJ_SUFFIX)
+ AC_SUBST(LIB_SUFFIX)
++AC_SUBST(IMPORT_LIB_SUFFIX)
+ AC_SUBST(DLL_SUFFIX)
+ AC_SUBST(ASM_SUFFIX)
+ AC_SUBST(WRAP_LDFLAGS)
+--- pr/include/md/_win95.cfg	2014-08-12 17:40:57.000000000 +0200
++++ pr/include/md/_win95.cfg	2014-10-03 12:26:40.072472067 +0200
+@@ -68,7 +68,7 @@
+ #define PR_BYTES_PER_WORD_LOG2	2
+ #define PR_BYTES_PER_DWORD_LOG2	3
+ 
+-#elif defined(_M_X64) || defined(_M_AMD64) || defined(_AMD64_)
++#elif defined(_M_X64) || defined(_M_AMD64) || defined(_AMD64_) || defined (_WIN64)
+ 
+ #define IS_LITTLE_ENDIAN 1
+ #undef  IS_BIG_ENDIAN
+--- pr/include/md/_winnt.cfg	2014-08-12 17:40:57.000000000 +0200
++++ pr/include/md/_winnt.cfg	2014-10-03 12:26:40.072472067 +0200
+@@ -68,7 +68,7 @@
+ #define PR_BYTES_PER_WORD_LOG2	2
+ #define PR_BYTES_PER_DWORD_LOG2	2
+ 
+-#elif defined(_M_X64) || defined(_M_AMD64) || defined(_AMD64_)
++#elif defined(_M_X64) || defined(_M_AMD64) || defined(_AMD64_) || defined (_WIN64)
+ 
+ #define IS_LITTLE_ENDIAN 1
+ #undef  IS_BIG_ENDIAN
+--- pr/src/md/windows/ntgc.c	2014-08-12 17:40:57.000000000 +0200
++++ pr/src/md/windows/ntgc.c	2014-10-03 12:26:40.073472045 +0200
+@@ -12,7 +12,7 @@
+ 
+ PRWord *_MD_HomeGCRegisters(PRThread *t, int isCurrent, int *np) 
+ {
+-#if defined(_X86_)
++#if defined(_X86_) && (!defined(_AMD64_))
+     CONTEXT context;
+     context.ContextFlags = CONTEXT_INTEGER;
+ 
+--- tools/Makefile.in	2014-08-12 17:40:57.000000000 +0200
++++ tools/Makefile.in	2014-10-03 12:31:18.265158552 +0200
+@@ -167,7 +167,7 @@
+ 	echo winsock.lib     >>w16link
+ 	wlink @w16link.
+ else
+-	link $(LDOPTS) $< $(LIBPR) $(LIBPLC) ws2_32.lib -out:$@
++	link $(LDOPTS) $< $(LIBPR) $(LIBPLC) ws2_32.lib mswsock.lib -out:$@
+ endif
+ else
+ ifeq ($(OS_ARCH),OS2)

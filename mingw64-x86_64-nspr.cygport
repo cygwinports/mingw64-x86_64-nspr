@@ -1,0 +1,42 @@
+CROSS_HOST="x86_64-w64-mingw32"
+inherit cross
+
+NAME="mingw64-x86_64-nspr"
+VERSION=4.10.10
+RELEASE=1
+CATEGORY="Devel"
+SUMMARY="Netscape Portable Runtime library for Win64 toolchain"
+DESCRIPTION="Netscape Portable Runtime (NSPR) provides a platform-neutral API
+for system level and libc like functions. The API is used in the Mozilla
+client, many of Netscape/AOL/iPlanet's and other software offerings."
+HOMEPAGE="http://www.mozilla.org/projects/nspr/"
+SRC_URI="https://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v${VERSION}/src/nspr-${VERSION}.tar.gz"
+SRC_DIR="nspr-${VERSION}/nspr"
+PATCH_URI="
+	nspr-build.patch
+	nspr-pkgconfig.patch
+	nspr-threads.patch
+"
+
+MAKEOPTS+=' -j1'
+
+src_compile() {
+	cd ${B}
+
+	cygconf --enable-win32-target=WINNT --enable-64bit
+	cygmake -C config CC=gcc CFLAGS="-DXP_UNIX=1"
+	cygmake NSINSTALL=`pwd`/config/nsinstall RANLIB=${RANLIB} RC=${RC}
+}
+
+src_install() {
+	cd ${B}
+	cyginstall NSINSTALL=`pwd`/config/nsinstall
+
+	dodir ${CROSS_PREFIX}
+	cp -RL dist/* ${D}${CROSS_PREFIX}/
+
+	# no need for static libs
+#	rm -f ${D}${CROSS_LIBDIR}/lib*_s.a
+
+	rm -f ${D}${CROSS_BINDIR}/prerr.properties ${D}${CROSS_LIBDIR}/lib*.dll
+}
